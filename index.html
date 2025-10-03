@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cumpleaños - LNB</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistema de Cumpleaños Automático</h1>
+            <p>Administración de trabajadores - LNB</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- Columna Izquierda -->
+            <div class="column">
+                <div class="card">
+                    <h2>📊 Estadísticas</h2>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number" id="total-employees">0</div>
+                            <div>Total Empleados</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="birthdays-today">0</div>
+                            <div>Cumpleaños Hoy</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="sent-today">0</div>
+                            <div>Enviados Hoy</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🎂 Cumpleaños de Hoy</h2>
+                    <div id="today-birthdays" class="loading">Cargando...</div>
+                </div>
+
+                <div class="card">
+                    <h2>📝 Actividad Reciente</h2>
+                    <div id="activity-logs" class="logs-container"></div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha -->
+            <div class="column">
+                <div class="card">
+                    <h2>📅 Próximos Cumpleaños</h2>
+                    <div id="upcoming-birthdays" class="loading">Cargando...</div>
+                </div>
+
+                <div class="card">
+                    <h2>👥 Gestión de Empleados</h2>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="openModal()">⚙️ Gestionar</button>
+                        <button class="btn btn-success" onclick="checkBirthdays()">🔍 Verificar</button>
+                        <button class="btn btn-warning" onclick="sendTestEmail()">📧 Probar Email</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🎛️ Control del Sistema</h2>
+                    <div class="system-controls">
+                        <label class="checkbox">
+                            <input type="checkbox" id="auto-mode" checked>
+                            <span>Modo Autónomo</span>
+                        </label>
+                        <button class="btn btn-secondary" onclick="sendAllBirthdays()">🚀 Enviar Todos</button>
+                        <div class="next-check">Próxima verificación: <span id="next-check">--:--</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pantalla Completa -->
+    <div id="modal" class="modal fullscreen-modal">
+        <div class="modal-content fullscreen-content">
+            <div class="modal-header fullscreen-header">
+                <div class="header-content">
+                    <h2>👥 Gestión de Empleados - Vista Completa</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="exportToExcel()">📊 Exportar Excel</button>
+                        <button class="btn btn-success" onclick="showAddForm()">➕ Agregar Empleado</button>
+                        <button class="close-btn" onclick="closeModal()">× Cerrar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-body fullscreen-body">
+                <!-- Vista de Tabla -->
+                <div id="table-view">
+                    <div class="fullscreen-controls">
+                        <div class="control-group">
+                            <div class="search-box">
+                                <input type="text" id="employee-search" placeholder="Buscar empleados...">
+                                <span class="search-icon">🔍</span>
+                            </div>
+                            <div class="table-info">
+                                <span id="employee-count">0 empleados</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="sort-options">
+                                <button class="btn btn-secondary" onclick="sortEmployees('nombre')">📝 Ordenar por Nombre</button>
+                                <button class="btn btn-secondary" onclick="sortEmployees('fecha_nacimiento')">📅 Ordenar por Fecha</button>
+                                <button class="btn btn-secondary" onclick="sortEmployees('id')">🔄 Orden Original</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container-fullscreen">
+                        <table id="employees-table" class="excel-table fullscreen-table">
+                            <thead>
+                                <tr>
+                                    <th width="25%">Nombre Completo</th>
+                                    <th width="30%">Email</th>
+                                    <th width="20%">Fecha de Nacimiento</th>
+                                    <th width="15%">Edad</th>
+                                    <th width="10%">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employees-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Vista de Formulario -->
+                <div id="form-view" style="display: none;">
+                    <div class="add-form-container">
+                        <div class="add-form-header">
+                            <h3>➕ Agregar Nuevo Empleado</h3>
+                            <button type="button" class="btn btn-secondary" onclick="showTableView()">← Volver a la tabla</button>
+                        </div>
+                        <form id="add-form" class="add-form fullscreen-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new-name">Nombre completo:</label>
+                                    <input type="text" id="new-name" required placeholder="Ej: Juan Pérez">
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-email">Email:</label>
+                                    <input type="email" id="new-email" required placeholder="Ej: juan@empresa.com">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new-birthdate">Fecha de nacimiento:</label>
+                                    <input type="date" id="new-birthdate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-success">➕ Agregar Empleado</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notifications"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
